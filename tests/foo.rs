@@ -1,70 +1,43 @@
-extern crate afmt;
+#[macro_use] extern crate afmt;
 
-use afmt::fmt;
-use std::str::FromStr;
-
-#[fmt("v: " v " f: " f)]
-struct Foo {
-    v: u32,
-    f: f64,
-}
-
-#[fmt("<" level ">" name ": " msg)]
-struct Log {
-    level: u32,
-    name: String,
-    msg: String,
-}
-
-#[fmt()]
-struct Empty;
-
-#[fmt(v)]
-struct OneValue {
-    v: u32,
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
+/// A simple struct format
+mod simple {
+    #[fmt("value: " v)]
+    struct Foo {
+        v: u32,
+    }
 
     #[test]
-    fn foo() {
-        let f: Foo = "v: 65 f: 3.1415".parse().unwrap();
+    fn parse_correctly() {
+        let f: Foo = "value: 65".parse().unwrap();
         assert_eq!(f.v, 65);
-        assert_eq!(f.f, 3.1415);
     }
 
     #[test]
-    fn log() {
-        let l: Log = "<65>my_func: hello this is the msg".parse().unwrap();
-        assert_eq!(l.level, 65);
-        assert_eq!(l.name, "my_func".to_owned());
-        assert_eq!(l.msg, "hello this is the msg".to_owned());
+    fn literal_bad_match() {
+        let f: Result<Foo, _> = "val: 35".parse();
+        assert!(f.is_err());
     }
 
     #[test]
-    fn complex_log() {
-        let l: Log = "<43>func<>name: this<>is the msg".parse().unwrap();
-        assert_eq!(l.level, 43);
-        assert_eq!(l.name, "func<>name".to_owned());
-        assert_eq!(l.msg, "this<>is the msg".to_owned());
+    fn capture_bad_parse() {
+        let f: Result<Foo, _> = "value: 5x6".parse();
+        assert!(f.is_err());
+    }
+}
+
+/// Slightly more complex struc format
+mod point {
+    #[fmt("x[" x "] y[" y "]")]
+    struct Point {
+        x: i32,
+        y: i32,
     }
 
     #[test]
-    fn empty() {
-        let _e: Empty = "rand".parse().unwrap();
-    }
-
-    #[test]
-    fn one_value() {
-        let o: OneValue = "356".parse().unwrap();
-        assert_eq!(o.v, 356);
-    }
-
-    #[test]
-    fn with_radix() {
-        let u = u32::from_str_radix("deadbeef", 16).unwrap();
-        assert_eq!(u, 0xdeadbeef);
+    fn works() {
+        let p: Point = "x[-34] y[79]".parse().unwrap();
+        assert_eq!(p.x, -34);
+        assert_eq!(p.y, 79);
     }
 }
