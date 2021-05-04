@@ -119,9 +119,9 @@ pub fn fmt(attr: TokenStream, item: TokenStream) -> TokenStream {
     let tokens = quote! {
         #s
 
-        impl FromStr for #s_ident {
+        impl ::std::str::FromStr for #s_ident {
             type Err = ();
-            fn from_str(s: &str) -> Result<#s_ident, <#s_ident as FromStr>::Err> {
+            fn from_str(s: &str) -> Result<#s_ident, <#s_ident as ::std::str::FromStr>::Err> {
                 #(#parse)*
 
                 Ok(#s_ident {
