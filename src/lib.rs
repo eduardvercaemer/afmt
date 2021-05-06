@@ -2,66 +2,59 @@ extern crate proc_macro;
 extern crate devise;
 use ::proc_macro::{TokenStream};
 use ::devise::quote::{quote};
+use ::devise::proc_macro2::{TokenStream as TokenStream2};
 use ::devise::syn;
-#[derive(Debug)]
-enum Arg {
-    Text(syn::LitStr),
-    Ident(syn::Ident),
-}
 
-#[derive(Debug)]
-struct Args {
-    args: Vec<Arg>,
-}
-
-impl syn::parse::Parse for Args {
-    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
-        let mut ret = Args {
-            args: vec![],
-        };
-        
-        let mut prev = false;
-        loop {
-            if input.is_empty() {
-                return Ok(ret);
-            }
-
-            let lookahead = input.lookahead1();
-
-            if lookahead.peek(syn::Lit) { // literal
-                let lit: syn::Lit = input.parse().unwrap();
-                match lit {
-                    syn::Lit::Str(s) => {
-                        ret.args.push(Arg::Text(s));
-                    }
-                    _ => return Err(lookahead.error()),
-                }
-                prev = false;
-            } else if lookahead.peek(syn::Ident) {
-                if prev {
-                    // cannot have two idents next to each other
-                    return Err(lookahead.error());
-                }
-                let ident: syn::Ident = input.parse().unwrap();
-                ret.args.push(Arg::Ident(ident));
-                prev = true;
-            } else {
-                return Err(lookahead.error());
-            }
-        }
-    }
-}
+mod parse;
+use parse::{Args, Arg};
 
 #[proc_macro_attribute]
 pub fn fmt(attr: TokenStream, item: TokenStream) -> TokenStream {    
     let input = syn::parse_macro_input!(item as syn::ItemStruct);
     let args = syn::parse_macro_input!(attr as Args);
 
-    let s = &input;
-    let s_ident = &input.ident;
+    /* gather everything we need */
+    let s = &input;                         // struct item
+    let s_ident = &input.ident;                 // struct ident
+    let s_fields = struct_field_idents(s);   // struct field idents
+    let s_parse = argument_parsing(args);   // code that parses the struct
 
+    let tokens = quote! {
+        #s
+
+        impl ::std::str::FromStr for #s_ident {
+            type Err = ();
+            fn from_str(s: &str) -> Result<#s_ident, <#s_ident as ::std::str::FromStr>::Err> {
+                #s_parse
+
+                Ok(#s_ident {
+                    #(#s_fields),*
+                })
+            }
+        }
+    };
+
+    tokens.into()
+}
+
+/// From a struct item, get the vector of field idents
+///  in: struct { v: u32, f: f32 }
+///  out: [v, f]
+fn struct_field_idents(s: &syn::ItemStruct) -> Vec<syn::Ident> {
+    let mut build = vec![];
+    for field in s.fields.iter() {
+        let i = field.ident.clone();
+        build.push(i.unwrap());
+    }
+    build
+}
+
+/// From a vector of `fmt` arguments, generate the code that
+/// correctly parses a string in scope `s` into the appropiate fields
+fn argument_parsing(args: Args) -> TokenStream2 {
     let mut parse = vec![];
     let mut args = args.args.into_iter();
+
     while let Some(arg) = args.next() {
         match arg {
             // consume text
@@ -109,26 +102,7 @@ pub fn fmt(attr: TokenStream, item: TokenStream) -> TokenStream {
         };
     }
 
-    let mut build = vec![];
-    for field in s.fields.iter() {
-        let i = field.ident.clone();
-        build.push(i.unwrap());
-    }
-
-    let tokens = quote! {
-        #s
-
-        impl ::std::str::FromStr for #s_ident {
-            type Err = ();
-            fn from_str(s: &str) -> Result<#s_ident, <#s_ident as ::std::str::FromStr>::Err> {
-                #(#parse)*
-
-                Ok(#s_ident {
-                    #(#build),*
-                })
-            }
-        }
-    };
-
-    tokens.into()
+    quote! {
+        #(#parse)*
+    }    
 }
