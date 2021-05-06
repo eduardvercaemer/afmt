@@ -1,9 +1,8 @@
 extern crate proc_macro;
 extern crate devise;
-extern crate syn;
-use proc_macro::TokenStream;
-use devise::quote::quote;
-
+use ::proc_macro::{TokenStream};
+use ::devise::quote::{quote};
+use ::devise::syn;
 #[derive(Debug)]
 enum Arg {
     Text(syn::LitStr),

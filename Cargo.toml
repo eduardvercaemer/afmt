@@ -10,5 +10,4 @@ edition = "2018"
 proc-macro = true
 
 [dependencies]
-devise = "*"
-syn = "*"
+devise = "0.2.0"
