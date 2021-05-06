@@ -1,6 +1,6 @@
 # afmt
 
-Simple rust library for parsing complex data structures from
+Simple rust library for parsing basic data structures from
 strings.
 
 ## Usage
@@ -10,11 +10,13 @@ in which you can specify a chain of string literals and struct member names, to
 represent the format of a structure.
 
 ```rust
-#[fmt("text " "mote text " v ":" r)]
+#[fmt("value: " v "--" f)]
 struct Foo {
     v: u32,
     r: f64,
 }
+
+let f: Foo = "value: 65--3.14".parse()?;
 ```
 
 ## Limitations
