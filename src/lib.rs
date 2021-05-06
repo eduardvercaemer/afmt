@@ -1,3 +1,20 @@
+//! This crate provides the `fmt` attribute macro, its usage is simple:
+//!
+//! ```
+//! #[macro_use] extern crate afmt;
+//!
+//! #[fmt("value: " v)]
+//! struct Foo {
+//!     v: u32,   
+//! }
+//!
+//! let f: Foo = "value: 65".parse()?;
+//! assert_eq!(f.v, 65);
+//!
+//! let f: Result<Foo,_> = "val: 65".parse();
+//! assert!(f.is_err());
+//! ```
+
 extern crate proc_macro;
 extern crate devise;
 use ::proc_macro::{TokenStream};
