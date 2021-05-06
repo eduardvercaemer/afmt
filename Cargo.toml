@@ -6,6 +6,7 @@ license = "MIT"
 description = "Basic data structure parsing from strings"
 homepage = "https://github.com/eduardvercaemer/afmt"
 repository = "https://github.com/eduardvercaemer/afmt"
+documentation = "https://docs.rs/afmt"
 readme = "README.md"
 edition = "2018"
 
