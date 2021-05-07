@@ -14,12 +14,16 @@ fn main() {
     let logs = vec![
         "<5>httpd: GET '/'",
         "<3>systemd: oh no !",
-        "<7>sshd: connection inbpund",
+        "<7>sshd: connection inbound",
+        "invalid log entry",
+        "<bad number>name: wow",
+        "<",
     ];
 
     for log in logs {
-        if let Ok(log) = log.parse::<Log>() {
-            dbg!(log);
+        match log.parse::<Log>() {
+            Ok(log) => println!("{:?}", log),
+            Err(e) => println!("{:?}", e),
         }
     }
 }
