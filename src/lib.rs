@@ -35,7 +35,7 @@ pub fn fmt(attr: TokenStream, item: TokenStream) -> TokenStream {
     /* gather everything we need */
     let s = &input;
     let s_ident = &input.ident;
-    let s_fields = struct_field_idents(s);
+    let s_build = codegen::struct_builder(s);
     let s_parse = codegen::codegen(fmt);
 
     let code = quote! {
@@ -46,24 +46,10 @@ pub fn fmt(attr: TokenStream, item: TokenStream) -> TokenStream {
             fn from_str(s: &str) -> Result<#s_ident, String> {
                 #s_parse
 
-                Ok(#s_ident {
-                    #(#s_fields),*
-                })
+                Ok(#s_build)
             }
         }
     };
 
     code.into()
-}
-
-/// From a struct item, get the vector of field idents
-///  in: struct { v: u32, f: f32 }
-///  out: [v, f]
-fn struct_field_idents(s: &syn::ItemStruct) -> Vec<syn::Ident> {
-    let mut build = vec![];
-    for field in s.fields.iter() {
-        let i = field.ident.clone();
-        build.push(i.unwrap());
-    }
-    build
 }

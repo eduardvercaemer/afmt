@@ -1,7 +1,7 @@
-use ::devise::syn;
+use crate::parse::{Fmt, Section};
 use ::devise::proc_macro2::TokenStream as TokenStream2;
 use ::devise::quote::quote;
-use crate::parse::{Fmt, Section};
+use ::devise::syn;
 
 /// Codegen for a matching a string literal
 ///
@@ -93,5 +93,27 @@ pub fn codegen(fmt: Fmt) -> TokenStream2 {
 
     quote! {
         #(#code)*
+    }
+}
+
+/// Codegen for building a struct with default field names from a struct item
+///
+/// Example --
+///
+/// CODEGEN ARGS:
+///   s = "struct Foo { v: u32, f: f64 }"
+/// CODE OUT:
+///   Foo { v, f, }
+pub fn struct_builder(s: &syn::ItemStruct) -> TokenStream2 {
+    let ident = &s.ident;
+    let mut fields = vec![];
+    for field in s.fields.iter() {
+        let field = field.ident.clone();
+        fields.push(field.unwrap());
+    }
+    quote! {
+        #ident {
+            #(#fields),*
+        }
     }
 }
