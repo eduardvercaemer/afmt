@@ -1,6 +1,6 @@
 [package]
 name = "afmt"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Eduard Vercaemer <vercaemereduard@gmail.com>"]
 license = "MIT"
 description = "Basic data structure parsing from strings"
