@@ -8,11 +8,14 @@
 //!     v: u32,   
 //! }
 //!
-//! let f: Foo = "value: 65".parse()?;
-//! assert_eq!(f.v, 65);
+//! fn main() -> Result<(), Box<dyn std::error::Error>> {
+//!     let f: Foo = "value: 65".parse()?;
+//!     assert_eq!(f.v, 65);
 //!
-//! let f: Result<Foo,_> = "val: 65".parse();
-//! assert!(f.is_err());
+//!     let f: Result<Foo,_> = "val: 65".parse();
+//!     assert!(f.is_err());
+//!     Ok(())
+//! }
 //! ```
 
 extern crate proc_macro;
