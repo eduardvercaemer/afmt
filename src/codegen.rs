@@ -20,7 +20,7 @@ use ::devise::syn;
 fn str_match(lit: &syn::LitStr) -> TokenStream2 {
     quote! {
         if !s.starts_with(#lit) {
-            return Err(format!("string literal match for \"{}\" failed", #lit));
+            return Err(format!("string literal '{}' not matched", #lit));
         }
 
         let (_, s) = s.split_at(#lit .as_bytes().len());
@@ -69,7 +69,7 @@ fn capture_w_lookahead(field: &syn::Ident, lookahead: &syn::LitStr) -> TokenStre
     quote! {
         let idx = match s.find(#lookahead) {
             Some(idx) => idx,
-            None => return Err(format!("lookahead for \"{}\" not matched", #lookahead)),
+            None => return Err(format!("lookahead for '{}' not matched", #lookahead)),
         };
         let (left, s) = s.split_at(idx);
         let (_, s) = s.split_at(#lookahead .as_bytes().len());
